@@ -1,25 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Theme } from './Theme';
+import { Title } from './Title';
+import Form from './Form';
 
-function App() {
+const movies = [
+  {
+    name: 'Avengers',
+    available: 5,
+  },
+  {
+    name: 'Terminator',
+    available: 3,
+  },
+];
+
+export default function App() {
+  const [theme, setTheme] = React.useState('avengers');
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Theme theme={theme}>
+      <Title>Películas</Title>
+      {movies.map((movie) => (
+        <Form movie={movie} updateTheme={() => setTheme(movie.name)} />
+      ))}
+    </Theme>
   );
 }
-
-export default App;
