@@ -1,70 +1,134 @@
-# Getting Started with Create React App
+# Ejemplos de uso de Styled-Components
+(Fuente: Platzi)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+El ejemplo consiste en dos contadores de películas, cada uno de ellos posee un color asignado y una cantidad predeterminada de valores a ser sumados/restados con botones.
 
-## Available Scripts
+Cada vez que pasamos con el mouse por arriba de uno de los contadores, el color de fondo de la página cambia al color asignado a dicho contador.
 
-In the project directory, you can run:
+Además, cuando llegamos a los tope inferior o superior de las cantidades, los botones se deshabilitan. 
 
-### `npm start`
+## Caso 1: Elementos HTML envueltos fuera del archivo JSX
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. Creamos un archivo separado para el componente que vamos a crear.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```javascript
+import styled from 'styled-components';
 
-### `npm test`
+export const Title = styled.h2`
+  padding-bottom: 10px;
+  border-bottom: 1px solid ${(p) => p.theme.color2};
+`;
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Importamos el componente en el archivo donde lo vamos a usar.
 
-### `npm run build`
+```javascript
+import { Title } from './Title';
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. Usamos el componente en el archivo donde lo importamos.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```javascript
+<Title>Styled Components</Title>
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Caso 2: Estilización de elementos dentro de un mismo archivo
 
-### `npm run eject`
+```javascript
+import React from 'react';
+import styled from 'styled-components';
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+const StyledForm = styled.form`
+  font-family: courier;
+  margin: 0 50px 25px;
+  padding: 10px 25px 25px;
+  text-align: center;
+  transform: scale(1);
+  transition: transform 0.3s;
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  &:hover {
+    transform: scale(1.2);
+  }
+`;
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+const StyledButton = styled.button`
+  cursor: pointer;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  transition: 0.15s border-color;
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+  &:hover {
+    border-color: ${(p) => p.theme.color2};
+  }
 
-## Learn More
+  &[disabled] {
+    background: ${(p) => p.theme.color2};
+  }
+`;
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+export default function Form(props) {
+  const [quantity, setQuantity] = React.useState(0);
+  const { movie } = props;
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  return (
+    <StyledForm onMouseEnter={() => props.updateTheme()}>
+      <h3>{movie.name}</h3>
+      <StyledButton
+        type="button"
+        onClick={() => setQuantity(quantity - 1)}
+        disabled={quantity <= 0}>
+        -
+      </StyledButton>
+      {quantity}
+      <StyledButton
+        type="button"
+        onClick={() => setQuantity(quantity + 1)}
+        disabled={quantity >= movie.available}>
+        +
+      </StyledButton>
+    </StyledForm>
+  );
+}
+```
 
-### Code Splitting
+## Caso 3: Seteamos themes de forma dinámica con sólo :hover sobre un componenente determinado.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Para lo cual, debemos crear un ThemeProvider y un GlobalStyle (que incluiremos en alguna parte de nuestro proyecto)
 
-### Analyzing the Bundle Size
+```javascript
+import { ThemeProvider } from 'styled-components';
+import { GlobalStyle } from './GlobalStyle';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+const themes = {
+  avengers: {
+    bg: '#ceceff',
+    color: '#335',
+    color2: 'rgba(5, 5, 100, 0.5)',
+  },
+  terminator: {
+    bg: '#ccffcc',
+    color: '#010',
+    color2: 'rgba(50, 100, 50, 0.5)',
+  },
+};
 
-### Making a Progressive Web App
+export const Theme = (props) => (
+  <ThemeProvider theme={themes[props.theme.toLowerCase()]}>
+    <GlobalStyle />
+    {props.children}
+  </ThemeProvider>
+);
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Finalmente, creamos la lógica en el GlobalStyle:
 
-### Advanced Configuration
+```javascript
+import { createGlobalStyle } from 'styled-components';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export const GlobalStyle = createGlobalStyle`
+  html,
+  body {
+    background: ${(p) => p.theme.bg};
+  }
+`;
+```
